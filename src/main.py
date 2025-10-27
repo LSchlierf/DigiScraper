@@ -2,17 +2,20 @@ import authentication
 from bs4 import BeautifulSoup as BS
 import json
 import requests
+import os
 
 import globals
 import course
 
+fileDir = os.path.dirname(__file__)
+
 def getSecrets():
-    with open('secrets.json', 'r') as f:
+    with open(f'{fileDir}/../secrets.json', 'r') as f:
         data = f.read()
     return json.loads(data)
 
 def getCourseConfig():
-    with open('course_config.json', 'r') as f:
+    with open(f'{fileDir}/../course_config.json', 'r') as f:
         data = f.read()
     return json.loads(data)
 
