@@ -1,4 +1,3 @@
-import globals
 import os
 import json
 from bs4 import BeautifulSoup as BS
@@ -28,7 +27,7 @@ class Folder:
         folders = json.loads(form.get('data-folders'))
         
         for folder in folders:
-            Folder(f'{self.path}{os.sep}{folder["name"]}', folder['id'], self.cid, f'{self.relpath}/{folder["name"]}', self.indent + 1).update(session)
+            Folder(f'{self.path}{os.sep}{folder["name"]}', folder['id'], self.cid, folder["name"], self.indent + 1).update(session)
         
         for file in files:
             if not file['download_url']:
