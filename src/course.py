@@ -28,13 +28,13 @@ class Folder:
         folders = json.loads(form.get('data-folders'))
         
         for folder in folders:
-            Folder(f'{self.path}/{folder["name"]}', folder['id'], self.cid, f'{self.relpath}/{folder["name"]}', self.indent + 1).update(session)
+            Folder(f'{self.path}{os.sep}{folder["name"]}', folder['id'], self.cid, f'{self.relpath}/{folder["name"]}', self.indent + 1).update(session)
         
         for file in files:
             if not file['download_url']:
                 continue
             
-            fullpath = f'{self.path}/{file["name"]}'
+            fullpath = f'{self.path}{os.sep}{file["name"]}'
             if not os.path.exists(fullpath) or file['chdate'] > os.path.getmtime(fullpath):
                 print(f'{"  " * (self.indent + 1)}Downloading {file["name"]}')
                 r = session.get(

@@ -10,12 +10,12 @@ import course
 fileDir = os.path.dirname(__file__)
 
 def getSecrets():
-    with open(f'{fileDir}/../secrets.json', 'r') as f:
+    with open(os.path.abspath(os.sep.join([fileDir, '..', 'secrets.json'])), 'r') as f:
         data = f.read()
     return json.loads(data)
 
 def getCourseConfig():
-    with open(f'{fileDir}/../course_config.json', 'r') as f:
+    with open(os.path.abspath(os.sep.join([fileDir, '..', 'course_config.json'])), 'r') as f:
         data = f.read()
     return json.loads(data)
 
