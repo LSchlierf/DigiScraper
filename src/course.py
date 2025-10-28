@@ -28,6 +28,9 @@ class Folder:
             Folder(f'{self.path}/{folder["name"]}', folder['id'], self.cid).update(session)
         
         for file in files:
+            if not file['download_url']:
+                continue
+            
             fullpath = f'{self.path}/{file["name"]}'
             if not os.path.exists(fullpath) or file['chdate'] > os.path.getmtime(fullpath):
                 print("Downloading", file["name"])
