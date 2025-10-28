@@ -24,8 +24,6 @@ def main():
             json.dump(data, f, indent=2)
     
     print('Done.')
-    
-    pass
 
 if __name__ == '__main__':
     main()
