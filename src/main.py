@@ -46,7 +46,7 @@ def main():
     courses = initcourses(session, config)
     for c in courses:
         c.update(session)
-    print("Done.\n")
+    print("✔ Done.\n")
     
 if __name__ == '__main__':
     main()

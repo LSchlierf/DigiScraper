@@ -17,7 +17,7 @@ class Folder:
             os.makedirs(self.path, exist_ok=True)
     
     def update(self, session):
-        print(f'{"  " * self.indent}Updating {self.relpath}')
+        print(f'{"  " * self.indent}🖿 Updating {self.relpath}')
         r = session.get(
             f'{BASE_URL}/index/{self.id}?cid={self.cid}'
         )
@@ -35,7 +35,7 @@ class Folder:
             
             fullpath = f'{self.path}{os.sep}{file["name"]}'
             if not os.path.exists(fullpath) or file['chdate'] > os.path.getmtime(fullpath):
-                print(f'{"  " * (self.indent + 1)}Downloading {file["name"]}')
+                print(f'{"  " * (self.indent + 1)}⬇ Downloading {file["name"]}')
                 r = session.get(
                     file['download_url']
                 )

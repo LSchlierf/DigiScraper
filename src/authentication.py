@@ -6,7 +6,7 @@ import globals
 START_PAGE = "https://digicampus.uni-augsburg.de/dispatch.php/start"
 
 def login(username, password, totpkey) -> requests.Session or None:
-    print("Starting session")
+    print("🗝 Starting session")
     session = requests.Session()
     session.headers.update(globals.base_headers)
     r = session.get(
