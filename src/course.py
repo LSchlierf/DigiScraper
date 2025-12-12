@@ -35,7 +35,7 @@ class Folder:
             
             fullpath = f'{self.path}{os.sep}{file["name"]}'
             if not os.path.exists(fullpath) or file['chdate'] > os.path.getmtime(fullpath):
-                print(f'{"  " * (self.indent + 1)}⬇ Downloading {file["name"]}')
+                print(f'{"  " * (self.indent + 1)}⬇ {"Downloading" if not os.path.exists(fullpath) else "Updating"} {file["name"]}')
                 r = session.get(
                     file['download_url']
                 )

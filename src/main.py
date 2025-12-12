@@ -42,7 +42,11 @@ def initcourses(session : requests.Session, config):
 def main():
     secrets = getSecrets()
     config = getCourseConfig()
-    session = authentication.login(secrets['username'], secrets['password'], secrets['totpkey'])
+    try:
+        session = authentication.login(secrets['username'], secrets['password'], secrets['totpkey'])
+    except:
+        print("⨯ Could not start session.\n")
+        exit(1)
     courses = initcourses(session, config)
     for c in courses:
         c.update(session)
