@@ -1,15 +1,14 @@
 import os
-import json
 from bs4 import BeautifulSoup as BS
+import datetime
 
-BASE_URL = 'https://digicampus.uni-augsburg.de/dispatch.php/course/files'
-FILE_URL = 'https://digicampus.uni-augsburg.de/sendfile.php?force_download=1&type=0'
+BASE_URL = 'https://digicampus.uni-augsburg.de'
+API_URL = 'https://digicampus.uni-augsburg.de/jsonapi.php/v1'
 
 class Folder:
-    def __init__(self, path, id, cid, relpath, indent):
+    def __init__(self, path, id, relpath, indent):
         self.path = path
         self.id = id
-        self.cid = cid
         self.relpath = relpath
         self.indent = indent
         
@@ -19,26 +18,28 @@ class Folder:
     def update(self, session):
         print(f'{"  " * self.indent}🖿 Updating {self.relpath}')
         r = session.get(
-            f'{BASE_URL}/index/{self.id}?cid={self.cid}'
+            f'{API_URL}/folders/{self.id}/folders?page[limit]=2000'
         )
-        soup = BS(r.text, 'html.parser')
-        form = soup.find('form', {'id': 'files_table_form'})
-        files = json.loads(form.get('data-files'))
-        folders = json.loads(form.get('data-folders'))
         
-        for folder in folders:
-            Folder(f'{self.path}{os.sep}{folder["name"]}', folder['id'], self.cid, folder["name"], self.indent + 1).update(session)
-        
-        for file in files:
-            if not file['download_url']:
-                continue
+        for folder in r.json()['data']:            
+            Folder(f'{self.path}{os.sep}{folder['attributes']['name']}', folder['id'], folder['attributes']['name'], self.indent + 1).update(session)
             
-            fullpath = f'{self.path}{os.sep}{file["name"]}'
-            if not os.path.exists(fullpath) or file['chdate'] > os.path.getmtime(fullpath):
-                print(f'{"  " * (self.indent + 1)}⬇ {"Downloading" if not os.path.exists(fullpath) else "Updating"} {file["name"]}')
+        r = session.get(
+            f'{API_URL}/folders/{self.id}/file-refs?page[limit]=2000'
+        )
+        
+        for file in r.json()['data']:
+            if not file['attributes']['is-downloadable']:
+                continue
+        
+            fullpath = f'{self.path}{os.sep}{file['attributes']['name']}'
+            if not os.path.exists(fullpath) or datetime.datetime.fromisoformat(file['attributes']['chdate']).timestamp() > os.path.getmtime(fullpath):
+                print(f'{"  " * (self.indent + 1)}⬇ {"Downloading" if not os.path.exists(fullpath) else "Updating"} {file["attributes"]["name"]}')
+                
                 r = session.get(
-                    file['download_url']
+                    f'{BASE_URL}{file['meta']['download-url']}'
                 )
+                
                 with open(fullpath, 'wb+') as f:
                     f.write(r.content)
         
@@ -54,13 +55,11 @@ class Course:
     
     def update(self, session):
         r = session.get(
-            BASE_URL + '?cid=' + self.id
+            f'{API_URL}/courses/{self.id}/folders'
         )
-        soup = BS(r.text, 'html.parser')
         
-        form = soup.find('form', {'id': 'files_table_form'})
-        rootFolder = form.find('input', {'name':'parent_folder_id'}).get('value')
+        rootFolderId = [f['id'] for f in r.json()['data'] if f['attributes']['folder-type'] == 'RootFolder'][0]
         
-        Folder(self.path, rootFolder, self.id, self.name, 0).update(session)
+        Folder(self.path, rootFolderId, self.name, 0).update(session)
         
         return
