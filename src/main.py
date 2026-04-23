@@ -1,11 +1,12 @@
+#!/usr/bin/env python
 import authentication
-from bs4 import BeautifulSoup as BS
 import json
 import requests
 import os
 
-import globals
 import course
+
+API_URL = 'https://digicampus.uni-augsburg.de/jsonapi.php/v1'
 
 fileDir = os.path.dirname(__file__)
 
@@ -23,19 +24,22 @@ def initcourses(session : requests.Session, config):
     courses = []
     
     r = session.get(
-        'https://digicampus.uni-augsburg.de/dispatch.php/my_courses',
-        headers=globals.base_headers
+        f'{API_URL}/users/me'
     )
-    soup = BS(r.text, 'html.parser').findAll('script')[4]
     
-    coursejson = soup.text[31:-1]
-    coursedata = json.loads(coursejson)['courses']
+    userId = r.json()['data']['id']
     
-    cousetitles = {coursedata[d]['name']: d for d in coursedata}
+    r = session.get(
+        f'{API_URL}/users/{userId}/courses?page[limit]=2000'
+    )
     
-    for c in config:
-        if c['name'] in cousetitles:
-            courses.append(course.Course(c['path'], cousetitles[c['name']], c['name']))
+    courseJson = r.json()['data']
+    
+    confignames = {c['name']: c['path'] for c in config}
+    
+    for c in courseJson:
+        if c['attributes']['title'] in confignames:
+            courses.append(course.Course(confignames[c['attributes']['title']], c['id'], c['attributes']['title']))
     
     return courses
 
